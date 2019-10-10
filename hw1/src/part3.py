@@ -124,6 +124,14 @@ class NNModel:
         # self.lossfn = lambda outputs, target: outputs[range(target.shape[0]), target].sum()
         # self.lossfn = lambda outputs, target: -1*outputs[range(target.shape[0]), target].mean()
         self.lossfn = F.nll_loss  # this seems good
+        # self.lossfn = torch.nn.NLLLoss()  # difference?
+        # or:
+        # note: the cross entropy loss already includes the softmax
+        # so the following loss functions are not correct
+        # self.nNn = torch.nn.CrossEntropyLoss()
+        # self.lossfn = lambda outputs, target: self.nNn(torch.exp(outputs), target)
+        # or: try this
+        # self.lossfn = lambda outputs, target: (torch.nn.CrossEntropyLoss())(torch.exp(outputs), target)
         # mean or sum?  positive or negative?
         self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate)
 
