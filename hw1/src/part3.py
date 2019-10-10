@@ -72,6 +72,21 @@ class CNN(nn.Module):
     """
     def __init__(self):
         super().__init__()
+        self.conv1 = nn.Conv2d(1, 10, 5, 1)
+        self.conv2 = nn.Conv2d(10, 50, 5, 1)
+        self.fc1 = nn.Linear(50*4*4,256)
+        self.fc2 = nn.Linear(256, 10)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        x = F.max_pool2d(x, 2, 2)
+        x = F.relu(self.conv2(x))
+        x = F.max_pool2d(x, 2, 2)
+        x = x.view(-1, 4*4*50)
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
+        x = F.log_softmax(x, dim=1)
+        return x
 
 
 class NNModel:
@@ -102,7 +117,14 @@ class NNModel:
         
         Hint: All networks output log-softmax values (i.e. log probabilities or.. likelihoods.). 
         """
-        self.lossfn = None
+        # self.lossfn = lambda output, label: {
+        #     # 64,10 -> 64
+        #     # all batch?
+        # }
+        # self.lossfn = lambda outputs, target: outputs[range(target.shape[0]), target].sum()
+        # self.lossfn = lambda outputs, target: -1*outputs[range(target.shape[0]), target].mean()
+        self.lossfn = F.nll_loss  # this seems good
+        # mean or sum?  positive or negative?
         self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate)
 
         self.num_train_samples = len(self.trainloader)
@@ -172,7 +194,16 @@ class NNModel:
         self.model.train()
         for images, labels in self.trainloader:
             log_ps = self.model(images)
+            # print(log_ps)
+            # print(labels)
+            # print(log_ps.shape, labels.shape)
             loss = self.lossfn(log_ps, labels)
+            # print("loss: ", loss)
+            # sum = 0
+            # for i in range(64):
+            #     sum += log_ps[i][labels[i]]
+            # print("sum: ", sum)
+            # exit(0)
 
             self.optimizer.zero_grad()
             loss.backward()
@@ -212,6 +243,8 @@ def plot_result(results, names):
 
 
 def main():
+    # models = [Linear(), FeedForward()]  # Change during development
+    # epochs = 1
     models = [Linear(), FeedForward(), CNN()]  # Change during development
     epochs = 10
     results = []
