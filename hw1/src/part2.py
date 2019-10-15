@@ -87,7 +87,7 @@ class LinearModel:
 
         We take advantage of the simplification shown in Lecture 2b, slide 23,
         to compute the gradient directly from the differential or difference
-        dE/ds = z - t (which is passed in as diff)
+        -dE/ds = t - z (which is passed in as diff)
 
         The resulting weight update should look essentially the same as for the
         Perceptron Learning Rule (shown in Lectures 1c, slide 11) except that
@@ -128,12 +128,13 @@ def main():
 
     for i in range(epochs):
         num_correct = 0
+        cost = 0
         for x, y in zip(inputs, labels):
             # Get prediction
             output = model.forward(x)
 
             # Calculate loss
-            cost = model.loss(output, y)
+            cost += model.loss(output, y)
 
             # Calculate difference or differential
             diff = model.error(output, y)
@@ -145,7 +146,7 @@ def main():
             preds = output > 0.5  # 0.5 is midline of sigmoid
             num_correct += int(preds == y)
 
-        print(f" Cost: {cost:8.6f} Accuracy: {num_correct / len(inputs) * 100}%")
+        print(f" Cost: {cost/len(inputs):.2f} Accuracy: {num_correct / len(inputs) * 100:.2f}%")
         model.plot(inputs, "C2--")
     model.plot(inputs, "k")
     plt.show()
